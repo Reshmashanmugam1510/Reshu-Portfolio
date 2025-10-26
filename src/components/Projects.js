@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Container, Row, Col, Tab, Nav, Card, Button, Form } from "react-bootstrap";
 import sampleImg from "../assets/img/img2.png"
 import colorSharp2 from "../assets/img/color-sharp2.png";
@@ -7,45 +7,23 @@ import TrackVisibility from 'react-on-screen';
 
 export const Projects = () => {
 
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // static list of projects requested by the user
+  const initialProjects = [
+    { title: "Shopify", description: "Shopify customization and theme work", imgUrl: sampleImg, repoUrl: "https://github.com/Reshmashanmugam1510/shopify", language: "Unknown" },
+    { title: "GlobeTrek", description: "GlobeTrek project (travel-related)", imgUrl: sampleImg, repoUrl: "https://github.com/Reshmashanmugam1510/GlobeTrek ", language: "Unknown" },
+    { title: "Landing Page", description: "Static landing page designs", imgUrl: sampleImg, repoUrl: "", language: "Unknown" },
+    { title: "Pdf-CHat", description: "PDF chat integration", imgUrl: sampleImg, repoUrl: "https://github.com/Reshmashanmugam1510/PDF-Chat", language: "Unknown" },
+    { title: "RAG", description: "Retrieval-Augmented Generation examples", imgUrl: sampleImg, repoUrl: "https://github.com/Reshmashanmugam1510/rag1", language: "Unknown" },
+    { title: "Portfolio", description: "Personal portfolio website", imgUrl: sampleImg, repoUrl: "https://github.com/Reshmashanmugam1510/Reshu-Portfolio ", language: "Unknown" },
+    { title: "User account mgmt Using c progeam", description: "User account management implemented in C (program)", imgUrl: sampleImg, repoUrl: "https://github.com/Reshmashanmugam1510/user-account-mngt---C-programming-", language: "C" },
+  ];
+
+  const [projects] = useState(initialProjects);
 
   // UI state
   const [query, setQuery] = useState("");
   const [language, setLanguage] = useState("All");
   const [hovered, setHovered] = useState(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchRepos = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetch("https://api.github.com/users/Reshmashanmugam1510/repos?per_page=100", {
-          signal: controller.signal
-        });
-        if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
-        const data = await res.json();
-        const mapped = data.map(repo => ({
-          id: repo.id,
-          title: repo.name,
-          description: repo.description || repo.language || "Repository",
-          // use sample image for all projects
-          imgUrl: sampleImg,
-          repoUrl: repo.html_url,
-          language: repo.language || "Unknown"
-        }));
-        setProjects(mapped);
-      } catch (err) {
-        if (err.name !== "AbortError") setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchRepos();
-    return () => controller.abort();
-  }, []);
 
   // derived
   const languages = ["All", ...Array.from(new Set(projects.map(p => p.language).filter(Boolean)))];
@@ -83,7 +61,7 @@ export const Projects = () => {
               {({ isVisible }) =>
               <div className={isVisible ? "animate__animated animate__fadeIn": ""}>
                 <h2 style={{marginBottom:8}}>Projects</h2>
-                <p style={{color:"#6b6b6b", marginBottom:20}}>A selection of public repositories. Use the search and filter to find projects.</p>
+                <p style={{color:"#6b6b6b", marginBottom:20}}>A curated list of selected projects.</p>
 
                 {/* Controls */}
                 <Row className="mb-4 align-items-center">
@@ -101,7 +79,7 @@ export const Projects = () => {
                     </Form.Select>
                   </Col>
                   <Col md={3} sm={6} className="text-md-end text-sm-start">
-                    <small style={{color:"#8a8a8a"}}>{loading ? "Loading..." : `${filtered.length} project(s)`}</small>
+                    <small style={{color:"#8a8a8a"}}>{`${filtered.length} project(s)`}</small>
                   </Col>
                 </Row>
 
@@ -122,15 +100,11 @@ export const Projects = () => {
                     <Tab.Pane eventKey="first">
                       <Row className="g-4">
                         {
-                          loading ? (
-                            <Col><p>Loading repositories...</p></Col>
-                          ) : error ? (
-                            <Col><p>Error loading repositories: {error}</p></Col>
-                          ) : filtered.length === 0 ? (
+                          filtered.length === 0 ? (
                             <Col><p>No repositories found.</p></Col>
                           ) : (
                             filtered.map((project, index) => (
-                              <Col sm={6} md={4} key={project.id || index}>
+                              <Col sm={6} md={4} key={index}>
                                 <Card
                                   style={{
                                     ...cardStyle,
@@ -170,7 +144,6 @@ export const Projects = () => {
                       </Row>
                     </Tab.Pane>
 
-                    {/* ...existing code for other panes... */}
                     <Tab.Pane eventKey="second">
                       <p>Featured projects — you can mark/filter featured manually later.</p>
                     </Tab.Pane>
